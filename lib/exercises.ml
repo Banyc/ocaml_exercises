@@ -49,4 +49,17 @@ let length (list: 'a list) =
 let%test _ =
   (length ["a"; "b"; "c"]) = 3
 let%test _ =
+  (length ["a"]) = 1
+let%test _ =
   (length []) = 0
+
+(* Reverse a List *)
+let rev (list: 'a list) =
+  let rec rev_impl ((rest: 'a list), (rev: 'a list)) = match rest with
+    | first :: rest -> rev_impl (rest, first :: rev)
+    | _ -> rev
+  in
+  rev_impl (list, [])
+
+let%test _ =
+  (rev ["a"; "b"; "c"]) = ["c"; "b"; "a"]
