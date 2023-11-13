@@ -63,3 +63,19 @@ let rev (list: 'a list) =
 
 let%test _ =
   (rev ["a"; "b"; "c"]) = ["c"; "b"; "a"]
+
+(* Palindrome *)
+let is_palindrome (list: 'a list) =
+  let rev = (rev list) in
+  let rec equal ((a: 'a list), (b: 'a list)) = match (a, b) with
+  | ([], []) -> true
+  | ([a], [b]) -> a = b
+  | (a_h :: a_rest, b_h :: b_rest) -> if a_h = b_h then equal (a_rest, b_rest) else false
+  | _ -> false
+  in
+  equal (list, rev)
+
+let%test _ =
+  is_palindrome ["x"; "a"; "m"; "a"; "x"]
+let%test _ =
+  not (is_palindrome ["a"; "b"])
