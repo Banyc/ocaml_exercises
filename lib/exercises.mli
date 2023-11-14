@@ -15,3 +15,4 @@ type 'a rle =
   | One of 'a
   | Many of int * 'a
 val rle_encode : 'a list -> 'a rle list
+val decode : 'a rle list -> 'a list

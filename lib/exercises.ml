@@ -181,3 +181,18 @@ let rec rle_encode (list: 'a list) =
 let%test _ =
   (rle_encode ["a"; "a"; "a"; "a"; "b"; "c"; "c"; "a"; "a"; "d"; "e"; "e"; "e"; "e"]) =
   [Many (4, "a"); One "b"; Many (2, "c"); Many (2, "a"); One "d"; Many (4, "e")]
+
+(* Decode a Run-Length Encoded List ☡ *)
+let rec decode (list: 'a rle list) = match list with
+| [] -> []
+| first :: rest ->
+  match first with
+  | One item -> item :: (decode rest)
+  | Many (times, item) ->
+    let rec repeat ((item: 'a), (times: int)) =
+      if times = 0 then [] else item :: repeat (item, times - 1)
+    in List.append (repeat (item, times)) (decode rest)
+
+let%test _ =
+  (decode [Many (4, "a"); One "b"; Many (2, "c"); Many (2, "a"); One "d"; Many (4, "e")]) =
+  ["a"; "a"; "a"; "a"; "b"; "c"; "c"; "a"; "a"; "d"; "e"; "e"; "e"; "e"]
