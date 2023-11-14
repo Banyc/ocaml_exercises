@@ -16,3 +16,5 @@ type 'a rle =
   | Many of int * 'a
 val rle_encode : 'a list -> 'a rle list
 val decode : 'a rle list -> 'a list
+val duplicate : 'a list -> 'a list
+val replicate : 'a list -> int -> 'a list

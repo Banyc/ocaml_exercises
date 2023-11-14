@@ -196,3 +196,25 @@ let rec decode (list: 'a rle list) = match list with
 let%test _ =
   (decode [Many (4, "a"); One "b"; Many (2, "c"); Many (2, "a"); One "d"; Many (4, "e")]) =
   ["a"; "a"; "a"; "a"; "b"; "c"; "c"; "a"; "a"; "d"; "e"; "e"; "e"; "e"]
+
+(* Duplicate the Elements of a List *)
+let rec duplicate (list: 'a list) = match list with
+| [] -> []
+| first :: rest -> first :: first :: duplicate rest
+
+let%test _ =
+  (duplicate ["a"; "b"; "c"; "c"; "d"]) = ["a"; "a"; "b"; "b"; "c"; "c"; "c"; "c"; "d"; "d"]
+
+(* Replicate the Elements of a List a Given Number of Times ☡ *)
+let rec replicate (list: 'a list) (times: int) =
+  if times <= 0 then [] else
+    let rec replicate_item (item: 'a) (times: int) =
+      if times <= 0 then [] else
+        item :: replicate_item item (times - 1)
+      in
+    match list with
+    | [] -> []
+    | first :: rest -> List.append (replicate_item first times) (replicate rest times)
+
+let%test _ =
+  (replicate ["a"; "b"; "c"] 3) = ["a"; "a"; "a"; "b"; "b"; "b"; "c"; "c"; "c"]
