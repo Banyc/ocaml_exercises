@@ -79,3 +79,15 @@ let%test _ =
   is_palindrome ["x"; "a"; "m"; "a"; "x"]
 let%test _ =
   not (is_palindrome ["a"; "b"])
+
+(* Flatten a List ☡ *)
+type 'a node =
+  | One of 'a 
+  | Many of 'a node list
+let rec flatten (list: 'a node list) = match list with
+  | [] -> []
+  | One node :: rest ->  node :: (flatten rest)
+  | Many list :: rest -> List.append (flatten list) (flatten rest)
+
+let%test _ =
+  (flatten [One "a"; Many [One "b"; Many [One "c" ;One "d"]; One "e"]]) = ["a"; "b"; "c"; "d"; "e"]
