@@ -163,3 +163,21 @@ let rec encode (list: 'a list) =
 let%test _ =
   (encode ["a"; "a"; "a"; "a"; "b"; "c"; "c"; "a"; "a"; "d"; "e"; "e"; "e"; "e"]) =
   [(4, "a"); (1, "b"); (2, "c"); (2, "a"); (1, "d"); (4, "e")]
+
+(* Modified Run-Length Encoding *)
+type 'a rle =
+  | One of 'a
+  | Many of int * 'a
+let rec rle_encode (list: 'a list) =
+  let rec count ((rest: 'a list), (counter: int), (target: 'a)) = match rest with
+  | first :: rest -> if first = target then count (rest, counter + 1, target) else ((first :: rest), counter)
+  | _ -> (rest, counter)
+  in match list with
+  | [] -> []
+  | first :: _ ->
+    let (rest, counter) = count (list, 0, first) in
+    if counter = 1 then One first :: rle_encode (rest) else Many (counter, first) :: rle_encode (rest)
+
+let%test _ =
+  (rle_encode ["a"; "a"; "a"; "a"; "b"; "c"; "c"; "a"; "a"; "d"; "e"; "e"; "e"; "e"]) =
+  [Many (4, "a"); One "b"; Many (2, "c"); Many (2, "a"); One "d"; Many (4, "e")]

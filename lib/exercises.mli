@@ -11,3 +11,7 @@ val flatten : 'a node list -> 'a list
 val compress : 'a list -> 'a list
 val pack : 'a list -> 'a list list
 val encode : 'a list -> (int * 'a) list
+type 'a rle =
+  | One of 'a
+  | Many of int * 'a
+val rle_encode : 'a list -> 'a rle list
