@@ -90,4 +90,76 @@ let rec flatten (list: 'a node list) = match list with
   | Many list :: rest -> List.append (flatten list) (flatten rest)
 
 let%test _ =
-  (flatten [One "a"; Many [One "b"; Many [One "c" ;One "d"]; One "e"]]) = ["a"; "b"; "c"; "d"; "e"]
+  (flatten [One "a"; Many [One "b"; Many [One "c"; One "d"]; One "e"]]) = ["a"; "b"; "c"; "d"; "e"]
+
+(* Eliminate Duplicates ☡ *)
+let rec compress (list: 'a list) = match list with
+| [] -> []
+| [ one ] -> [ one ]
+| first :: second :: rest -> if first = second then (compress (second :: rest)) else first :: (compress (second :: rest))
+
+let%test _ =
+  (compress ["a"; "a"; "a"; "a"; "b"; "c"; "c"; "a"; "a"; "d"; "e"; "e"; "e"; "e"]) = ["a"; "b"; "c"; "a"; "d"; "e"]
+
+(* Pack Consecutive Duplicates ☡ *)
+let rec pack (list: 'a list) =
+  let rec collect ((rest: 'a list), (box: 'a list)) = match (rest, box) with
+  | ((rest_h :: rest_t), (box_h :: box_t)) -> if rest_h = box_h then
+    (collect (rest_t, (rest_h :: box_h :: box_t)))
+  else
+    ((rest_h :: rest_t), (box_h :: box_t))
+  | ((rest_h :: rest_t), []) -> collect (rest_t, [rest_h])
+  | _ -> (rest, box)
+  in match list with
+  | [] -> []
+  | _ ->
+    let (rest, box) = (collect (list, [])) in
+    box :: (pack rest)
+
+let%test _ =
+  (pack ["a"; "a"; "a"; "a"; "b"; "c"; "c"; "a"; "a"; "d"; "d"; "e"; "e"; "e"; "e"]) =
+  [["a"; "a"; "a"; "a"]; ["b"]; ["c"; "c"]; ["a"; "a"]; ["d"; "d"]; ["e"; "e"; "e"; "e"]]
+
+let print_nested_list (list: 'a list list) =
+  let rec print_outer_list (list: 'a list list) =
+    let rec print_inner_list (list: 'a list) = match list with
+    | first :: rest ->
+      let _ = (Printf.printf "%s, " first) in
+      let _ = (print_inner_list rest) in
+      ()
+    | _ -> ()
+    in match list with
+    | first :: rest ->
+      let _ = (Printf.printf "[") in
+      let _ = (print_inner_list first) in
+      let _ = (Printf.printf "]") in
+      let _ = (print_outer_list rest) in
+      ()
+    | _ -> ()
+    in
+  let _ = Printf.printf "[" in
+  let _ = (print_outer_list list) in
+  let _ = Printf.printf "]" in
+  ()
+
+let _ = Printf.printf "Expected: "
+let _ = print_nested_list [["a"; "a"; "a"; "a"]; ["b"]; ["c"; "c"]; ["a"; "a"]; ["d"; "d"]; ["e"; "e"; "e"; "e"]]
+let _ = Printf.printf "\n"
+let _ = Printf.printf "Actual:   "
+let _ = print_nested_list (pack ["a"; "a"; "a"; "a"; "b"; "c"; "c"; "a"; "a"; "d"; "d"; "e"; "e"; "e"; "e"])
+let _ = Printf.printf "\n"
+
+(* Run-Length Encoding *)
+let rec encode (list: 'a list) =
+  let rec count ((rest: 'a list), (counter: int), (target: 'a)) = match rest with
+  | first :: rest -> if first = target then count (rest, counter + 1, target) else ((first :: rest), counter)
+  | _ -> (rest, counter)
+  in match list with
+  | [] -> []
+  | first :: _ ->
+    let (rest, counter) = count (list, 0, first) in
+    (counter, first) :: encode (rest)
+
+let%test _ =
+  (encode ["a"; "a"; "a"; "a"; "b"; "c"; "c"; "a"; "a"; "d"; "e"; "e"; "e"; "e"]) =
+  [(4, "a"); (1, "b"); (2, "c"); (2, "a"); (1, "d"); (4, "e")]
