@@ -238,3 +238,19 @@ let rec drop (list: 'a list) (n: int) =
 let%test _ =
   (drop ["a"; "b"; "c"; "d"; "e"; "f"; "g"; "h"; "i"; "j"] 3) =
   ["a"; "b"; "d"; "e"; "g"; "h"; "j"]
+
+(* Split a List Into Two Parts; The Length of the First Part Is Given *)
+let rec split (list: 'a list) (n: int) =
+  if n <= 0 then ([], list) else
+    match list with
+    | [] -> ([], [])
+    | first :: rest ->
+      let (left, right) = split rest (n - 1)  in
+      (first :: left, right)
+
+let%test _ =
+  (split ["a"; "b"; "c"; "d"; "e"; "f"; "g"; "h"; "i"; "j"] 3) =
+  (["a"; "b"; "c"], ["d"; "e"; "f"; "g"; "h"; "i"; "j"])
+let%test _ =
+  (split ["a"; "b"; "c"; "d"] 5) =
+  (["a"; "b"; "c"; "d"], [])

@@ -19,3 +19,4 @@ val decode : 'a rle list -> 'a list
 val duplicate : 'a list -> 'a list
 val replicate : 'a list -> int -> 'a list
 val drop : 'a list -> int -> 'a list
+val split : 'a list -> int -> ('a list * 'a list)
