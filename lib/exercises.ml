@@ -218,3 +218,23 @@ let rec replicate (list: 'a list) (times: int) =
 
 let%test _ =
   (replicate ["a"; "b"; "c"] 3) = ["a"; "a"; "a"; "b"; "b"; "b"; "c"; "c"; "c"]
+
+(* Drop Every N'th Element From a List ☡ *)
+let rec drop (list: 'a list) (n: int) =
+  if n <= 1 then [] else
+    let rec collect (list: 'a list) (n: int) =
+      if n <= 0 then ([], list) else
+        match list with
+        | [] -> ([], [])
+        | first :: rest ->
+          let (box, rest) = collect rest (n - 1) in
+          (first :: box, rest)
+    in
+    let (box, rest) = collect list (n - 1) in
+    match rest with
+    | [] -> box
+    | _del :: rest -> List.append box (drop rest n)
+
+let%test _ =
+  (drop ["a"; "b"; "c"; "d"; "e"; "f"; "g"; "h"; "i"; "j"] 3) =
+  ["a"; "b"; "d"; "e"; "g"; "h"; "j"]
