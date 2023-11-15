@@ -308,3 +308,11 @@ let rec insert_at (item: 'a) (pos: int) (list: 'a list) =
 
 let%test _ =
   (insert_at "alfa" 1 ["a"; "b"; "c"; "d"]) = ["a"; "alfa"; "b"; "c"; "d"]
+
+(* Create a List Containing All Integers Within a Given Range *)
+let rec range (from: int) (till: int) =
+  if from > till then [] else
+    from :: range (from + 1) till
+
+let%test _ =
+  (range 4 9) = [4; 5; 6; 7; 8; 9]

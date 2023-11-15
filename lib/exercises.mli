@@ -24,3 +24,4 @@ val slice : 'a list -> int -> int -> 'a list
 val rotate : 'a list -> int -> 'a list
 val remove_at : int -> 'a list -> 'a list
 val insert_at : 'a -> int -> 'a list -> 'a list
+val range : int -> int -> int list
