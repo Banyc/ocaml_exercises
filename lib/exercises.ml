@@ -288,3 +288,23 @@ let rotate (list: 'a list) (n: int) =
 let%test _ =
   (rotate ["a"; "b"; "c"; "d"; "e"; "f"; "g"; "h"] 3) =
   ["d"; "e"; "f"; "g"; "h"; "a"; "b"; "c"]
+
+(* Remove the K'th Element From a List *)
+let rec remove_at (k: int) (list: 'a list) =
+  match list with
+  | [] -> []
+  | first :: rest ->
+    if k <= 0 then rest else first :: (remove_at (k - 1) rest)
+
+let%test _ =
+  (remove_at 1 ["a"; "b"; "c"; "d"]) = ["a"; "c"; "d"]
+
+(* Insert an Element at a Given Position Into a List *)
+let rec insert_at (item: 'a) (pos: int) (list: 'a list) =
+  if pos <= 0 then item :: list else
+    match list with
+    | [] -> []
+    | first :: rest -> first :: insert_at item (pos - 1) rest
+
+let%test _ =
+  (insert_at "alfa" 1 ["a"; "b"; "c"; "d"]) = ["a"; "alfa"; "b"; "c"; "d"]
