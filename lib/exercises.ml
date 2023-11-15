@@ -316,3 +316,23 @@ let rec range (from: int) (till: int) =
 
 let%test _ =
   (range 4 9) = [4; 5; 6; 7; 8; 9]
+
+(* Extract a Given Number of Randomly Selected Elements From a List ☡ *)
+let rand_select (list: 'a list) (num: int) =
+  let () = Random.init 0  in
+  let rand_select_one (list: 'a list) =
+    let len = List.length list  in
+    let index = Random.int len  in
+    List.nth list index
+  in
+  let rec rand_select_impl (num: int) =
+    if num <= 0 then [] else
+      let item = rand_select_one list  in
+      item :: rand_select_impl (num - 1)
+  in
+  rand_select_impl num
+
+let () =
+  print_nested_list [rand_select ["a"; "b"; "c"; "d"; "e"; "f"; "g"; "h"] 3]
+let%test _ =
+  List.length (rand_select ["a"; "b"; "c"; "d"; "e"; "f"; "g"; "h"] 3) = 3
