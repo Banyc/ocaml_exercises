@@ -254,3 +254,37 @@ let%test _ =
 let%test _ =
   (split ["a"; "b"; "c"; "d"] 5) =
   (["a"; "b"; "c"; "d"], [])
+
+(* Extract a Slice From a List ☡ *)
+let rec slice (list: 'a list) (start: int) (rear: int) =
+  if start > 0 then
+    match list with
+    | [] -> []
+    | _del :: rest -> slice rest (start - 1) (rear - 1)
+  else
+    let rec collect (rest: 'a list) (counter: int) =
+      if counter > rear then [] else
+        match rest with
+        | [] -> []
+        | first :: rest -> first :: collect rest (counter + 1)
+    in
+    collect list 0
+
+let%test _ =
+  (slice ["a"; "b"; "c"; "d"; "e"; "f"; "g"; "h"; "i"; "j"] 2 6) =
+  ["c"; "d"; "e"; "f"; "g"]
+
+(* Rotate a List N Places to the Left ☡ *)
+let rotate (list: 'a list) (n: int) =
+  let rec collect (rest: 'a list) (box: 'a list) (left: int) =
+    if left <= 0 then (rest, box) else
+      match rest with
+      | [] -> ([], box)
+      | first :: rest -> collect rest (first :: box) (left - 1)
+  in
+  let (rest, box) = collect list [] n  in
+  List.append rest (List.rev box)
+
+let%test _ =
+  (rotate ["a"; "b"; "c"; "d"; "e"; "f"; "g"; "h"] 3) =
+  ["d"; "e"; "f"; "g"; "h"; "a"; "b"; "c"]
