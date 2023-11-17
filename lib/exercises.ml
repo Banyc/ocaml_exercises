@@ -22,29 +22,29 @@ let%test _ =
   (last_two ["a"]) = (None)
 
 (* N'th Element of a List *)
-let rec at ((list: 'a list), (index: int)) =
+let rec at (list: 'a list) (index: int) =
   if index < 0 then None
   else if index = 0 then match list with
     | first :: _rest -> Some first
     | _ -> None
   else match list with
-    | _first :: rest -> at (rest, (index - 1))
+    | _first :: rest -> at rest (index - 1)
     | _ -> None
 
 let%test _ =
-  (at (["a"; "b"; "c"; "d"; "e"], 2)) = (Some "c")
+  (at ["a"; "b"; "c"; "d"; "e"] 2) = (Some "c")
 let%test _ =
-  (at (["a"], 2)) = (None)
+  (at ["a"] 2) = (None)
 let%test _ =
-  (at ([], 2)) = (None)
+  (at [] 2) = (None)
 
 (* Length of a List *)
 let length (list: 'a list) =
-  let rec length_impl ((list: 'a list), (count: int)) = match list with
-  | _first :: rest -> length_impl (rest, count + 1)
+  let rec length_impl (list: 'a list) (count: int) = match list with
+  | _first :: rest -> length_impl rest (count + 1)
   | _ -> count
   in
-  length_impl (list, 0)
+  length_impl list 0
 
 let%test _ =
   (length ["a"; "b"; "c"]) = 3
@@ -55,11 +55,11 @@ let%test _ =
 
 (* Reverse a List *)
 let rev (list: 'a list) =
-  let rec rev_impl ((rest: 'a list), (rev: 'a list)) = match rest with
-    | first :: rest -> rev_impl (rest, first :: rev)
+  let rec rev_impl (rest: 'a list) (rev: 'a list) = match rest with
+    | first :: rest -> rev_impl rest (first :: rev)
     | _ -> rev
   in
-  rev_impl (list, [])
+  rev_impl list []
 
 let%test _ =
   (rev ["a"; "b"; "c"]) = ["c"; "b"; "a"]
@@ -103,17 +103,17 @@ let%test _ =
 
 (* Pack Consecutive Duplicates ☡ *)
 let rec pack (list: 'a list) =
-  let rec collect ((rest: 'a list), (box: 'a list)) = match (rest, box) with
+  let rec collect (rest: 'a list) (box: 'a list) = match (rest, box) with
   | ((rest_h :: rest_t), (box_h :: box_t)) -> if rest_h = box_h then
-    (collect (rest_t, (rest_h :: box_h :: box_t)))
+    (collect rest_t (rest_h :: box_h :: box_t))
   else
     ((rest_h :: rest_t), (box_h :: box_t))
-  | ((rest_h :: rest_t), []) -> collect (rest_t, [rest_h])
+  | ((rest_h :: rest_t), []) -> collect rest_t [rest_h]
   | _ -> (rest, box)
   in match list with
   | [] -> []
   | _ ->
-    let (rest, box) = (collect (list, [])) in
+    let (rest, box) = (collect list []) in
     box :: (pack rest)
 
 let%test _ =
@@ -169,13 +169,13 @@ type 'a rle =
   | One of 'a
   | Many of int * 'a
 let rec rle_encode (list: 'a list) =
-  let rec count ((rest: 'a list), (counter: int), (target: 'a)) = match rest with
-  | first :: rest -> if first = target then count (rest, counter + 1, target) else ((first :: rest), counter)
+  let rec count (rest: 'a list) (counter: int) (target: 'a) = match rest with
+  | first :: rest -> if first = target then count rest (counter + 1) target else ((first :: rest), counter)
   | _ -> (rest, counter)
   in match list with
   | [] -> []
   | first :: _ ->
-    let (rest, counter) = count (list, 0, first) in
+    let (rest, counter) = count list 0 first in
     if counter = 1 then One first :: rle_encode (rest) else Many (counter, first) :: rle_encode (rest)
 
 let%test _ =
@@ -189,9 +189,9 @@ let rec decode (list: 'a rle list) = match list with
   match first with
   | One item -> item :: (decode rest)
   | Many (times, item) ->
-    let rec repeat ((item: 'a), (times: int)) =
-      if times = 0 then [] else item :: repeat (item, times - 1)
-    in List.append (repeat (item, times)) (decode rest)
+    let rec repeat (item: 'a) (times: int) =
+      if times = 0 then [] else item :: repeat item (times - 1)
+    in List.append (repeat item times) (decode rest)
 
 let%test _ =
   (decode [Many (4, "a"); One "b"; Many (2, "c"); Many (2, "a"); One "d"; Many (4, "e")]) =
