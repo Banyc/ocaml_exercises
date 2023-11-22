@@ -87,7 +87,7 @@ type 'a node =
 let rec flatten (list: 'a node list) = match list with
   | [] -> []
   | One node :: rest ->  node :: (flatten rest)
-  | Many list :: rest -> List.append (flatten list) (flatten rest)
+  | Many list :: rest -> (flatten list) @ (flatten rest)
 
 let%test _ =
   (flatten [One "a"; Many [One "b"; Many [One "c"; One "d"]; One "e"]]) = ["a"; "b"; "c"; "d"; "e"]
@@ -191,7 +191,7 @@ let rec decode (list: 'a rle list) = match list with
   | Many (times, item) ->
     let rec repeat (item: 'a) (times: int) =
       if times = 0 then [] else item :: repeat item (times - 1)
-    in List.append (repeat item times) (decode rest)
+    in (repeat item times) @ (decode rest)
 
 let%test _ =
   (decode [Many (4, "a"); One "b"; Many (2, "c"); Many (2, "a"); One "d"; Many (4, "e")]) =
@@ -214,7 +214,7 @@ let rec replicate (list: 'a list) (times: int) =
       in
     match list with
     | [] -> []
-    | first :: rest -> List.append (replicate_item first times) (replicate rest times)
+    | first :: rest -> (replicate_item first times) @ (replicate rest times)
 
 let%test _ =
   (replicate ["a"; "b"; "c"] 3) = ["a"; "a"; "a"; "b"; "b"; "b"; "c"; "c"; "c"]
@@ -233,7 +233,7 @@ let rec drop (list: 'a list) (n: int) =
     let (box, rest) = collect list (n - 1) in
     match rest with
     | [] -> box
-    | _del :: rest -> List.append box (drop rest n)
+    | _del :: rest -> box @ (drop rest n)
 
 let%test _ =
   (drop ["a"; "b"; "c"; "d"; "e"; "f"; "g"; "h"; "i"; "j"] 3) =
@@ -283,7 +283,7 @@ let rotate (list: 'a list) (n: int) =
       | first :: rest -> collect rest (first :: box) (left - 1)
   in
   let (rest, box) = collect list [] n  in
-  List.append rest (List.rev box)
+  rest @ (List.rev box)
 
 let%test _ =
   (rotate ["a"; "b"; "c"; "d"; "e"; "f"; "g"; "h"] 3) =
